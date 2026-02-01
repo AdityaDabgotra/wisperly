@@ -1,4 +1,3 @@
-import React from "react";
 import {
   Html,
   Head,
@@ -15,7 +14,10 @@ interface VerificationEmailProps {
   otp: string;
 }
 
-export const VerificationEmail = ({ username, otp }: VerificationEmailProps) => {
+export default function VerificationEmail({
+  username,
+  otp,
+}: VerificationEmailProps) {
   return (
     <Html lang="en" dir="ltr">
       <Head>
@@ -31,24 +33,31 @@ export const VerificationEmail = ({ username, otp }: VerificationEmailProps) => 
           fontStyle="normal"
         />
       </Head>
-      <Preview>Here&apos;s your verification code: {otp}</Preview>
+
+      <Preview>Here's your verification code: {otp}</Preview>
+
       <Section>
         <Row>
           <Heading as="h2">Hello {username},</Heading>
         </Row>
+
         <Row>
           <Text>
             Thank you for registering. Please use the following verification
             code to complete your registration:
           </Text>
         </Row>
+
         <Row>
-          <Text>{otp}</Text>
+          <Text style={{ fontSize: "18px", fontWeight: "bold" }}>
+            {otp}
+          </Text>
         </Row>
+
         <Row>
           <Text>This code will expire in 15 minutes.</Text>
-          <Text>Use below link to verify your account</Text>
         </Row>
+
         <Row>
           <Text>
             If you did not request this code, please ignore this email.
@@ -57,4 +66,4 @@ export const VerificationEmail = ({ username, otp }: VerificationEmailProps) => 
       </Section>
     </Html>
   );
-};
+}
