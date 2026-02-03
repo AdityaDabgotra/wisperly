@@ -19,10 +19,10 @@ export async function GET(request:Request){
         //validate with zod
         const result = querySchema.safeParse(queryParam);
         if(!result.success){
-            const nameErrors = result.error.format().username?._errors || [];
+            const errors = z.treeifyError(result.error);
             return Response.json({
                 success:false,
-                message:nameErrors.join(", ")
+                message:errors
             }, {status:400});
         }
         const {username} = result.data;
