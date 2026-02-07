@@ -1,20 +1,55 @@
 'use client';
-import { useSession,signIn,signOut } from "next-auth/react";
 
-export default function page(){
-  const { data: session } = useSession();
-  if(session){
-    return (
-      <>
-        Signed in as {session.user?.email} <br/>
-        <button className="bg-orange-500 px-3 py-1 rounded m-2" onClick={() => signOut()}>Sign out</button>
-      </>
-    );
-  }
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useForm } from "react-hook-form";
+import * as z  from "zod";
+import Link from "next/link";
+import { useEffect, useState } from "react";
+import { useDebounceValue } from "usehooks-ts";
+import { Toaster } from "sonner";
+import { useRouter } from "next/navigation";
+import { signUpSchema } from "@/schemas/signUp";
+import axios, {AxiosError} from "axios";
+
+const page = () => {
+  const [username,setUsername] = useState();
+  const [usernameMessage,setUsernameMessage] = useState('');
+  const [isCheckingUsername,setIsCheckingUsername] = useState(false);
+  const [isSubmitting,setIsSubmitting] = useState(false);
+  const router = useRouter();
+  const debouncedUsername = useDebounceValue(username,300)
+
+  const form = useForm<z.infer<typeof signUpSchema>>({
+    resolver: zodResolver(signUpSchema),
+    defaultValues: {
+      username: '',
+      email: '',
+      password: '',
+    }
+    });
+
+    useEffect(() => {
+      const checkUsernameUnique = async () => {
+        if(debouncedUsername){
+          setIsCheckingUsername(true);
+          setUsernameMessage('');
+          try {
+            const response = await axios.get(`/api/check-username-unique?username=${debouncedUsername}`);
+            if(response.data.success){
+              setUsernameMessage('Username is available');
+            }
+          } catch (error) {
+            
+          }
+        }
+      }
+    },[debouncedUsername])
+
   return (
-    <>
-      Not signed in <br/>
-      <button className="bg-orange-500 px-3 py-1 rounded m-2" onClick={() => signIn()}>Sign in</button>
-    </>
-  );
+    <div>
+      
+    </div>
+  )
 }
+
+export default page
