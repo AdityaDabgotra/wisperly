@@ -19,10 +19,10 @@ export async function GET(request:Request){
         //validate with zod
         const result = querySchema.safeParse(queryParam);
         if(!result.success){
-            const errors = z.treeifyError(result.error);
+            const errors = result.error.flatten();
             return Response.json({
-                success:false,
-                message:errors
+                success: false,
+                message: errors.fieldErrors.username?.[0] ?? "Invalid username"
             }, {status:400});
         }
         const {username} = result.data;
