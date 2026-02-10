@@ -20,6 +20,7 @@ const page = () => {
   const [messages, setMessages] = useState<Message[]>([]);
   const [loading, setLoading] = useState<boolean>(false);
   const [isSwitchLoading, setIsSwitchLoading] = useState<boolean>(false);
+  const [suggestedMessages, setSuggestedMessages] = useState<string[]>([]);
   const handleDeleteMessage = (messageId: string) => {
     setMessages((prevMessages) =>
       prevMessages.filter((message) => message._id.toString() !== messageId)
@@ -74,6 +75,23 @@ const page = () => {
     },
     [setMessages, setLoading, setIsSwitchLoading]
   );
+
+  const fetchSuggestedMessages = async () => {
+    try {
+      const response = await axios.post<{ success: boolean; messages: string[] }>(
+        "/api/suggest-message"
+      );
+      if (response.data.success) {
+        setSuggestedMessages(response.data.messages ?? []);
+        toast.success("Here are some suggested messages");
+      } else {
+        setSuggestedMessages([]);
+        toast.error("Failed to load suggested messages");
+      }
+    } catch (error) {
+      toast.error("Failed to load suggested messages");
+    }
+  };
 
   useEffect(() => {
     if (status !== "authenticated") return;
@@ -150,11 +168,45 @@ const page = () => {
         </div>
         <Separator />
 
-        <Button className="mt-4" variant="outline" onClick={(e)=>{e.preventDefault();fetchMessages(true)}}>
-          {
-            loading ? (<Loader2 className="h-4 w-4 animate-spin"/>) : (<RefreshCcw className="h-4 w-4 " />)
-          }
-        </Button>
+        <div className="mt-4 flex flex-wrap items-center gap-3">
+          <Button
+            variant="outline"
+            onClick={(e) => {
+              e.preventDefault();
+              fetchMessages(true);
+            }}
+          >
+            {loading ? (
+              <Loader2 className="h-4 w-4 animate-spin" />
+            ) : (
+              <RefreshCcw className="h-4 w-4" />
+            )}
+          </Button>
+          <Button
+            type="button"
+            variant="outline"
+            onClick={(e) => {
+              e.preventDefault();
+              fetchSuggestedMessages();
+            }}
+          >
+            Suggest messages
+          </Button>
+        </div>
+
+        {suggestedMessages.length > 0 && (
+          <div className="mt-4 rounded-lg border border-slate-200 bg-slate-50 p-4 space-y-2">
+            <h3 className="text-sm font-semibold text-slate-900">
+              Suggested messages to share with others
+            </h3>
+            <ul className="list-disc list-inside space-y-1 text-sm text-slate-700">
+              {suggestedMessages.map((m, idx) => (
+                <li key={idx}>{m}</li>
+              ))}
+            </ul>
+          </div>
+        )}
+
         <div className="mt-4 grid grid-cols-1 md:grid-cols-2 gap-6">
           {
             messages.length > 0 ? (
