@@ -33,6 +33,7 @@ const UserMessagePage = () => {
   }, [params]);
 
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [suggestedMessages, setSuggestedMessages] = useState<string[]>([]);
 
   const form = useForm<MessageFormValues>({
     resolver: zodResolver(messageSchema),
@@ -62,6 +63,22 @@ const UserMessagePage = () => {
       toast.error(axiosError.response?.data.message || "Failed to send message");
     } finally {
       setIsSubmitting(false);
+    }
+  };
+
+  const fetchSuggestedMessages = async () => {
+    try {
+      const res = await axios.post<{ success: boolean; messages: string[] }>(
+        "/api/suggest-message"
+      );
+      if (res.data.success) {
+        setSuggestedMessages(res.data.messages ?? []);
+      } else {
+        setSuggestedMessages([]);
+        toast.error("Failed to load suggested messages");
+      }
+    } catch {
+      toast.error("Failed to load suggested messages");
     }
   };
 
@@ -115,9 +132,55 @@ const UserMessagePage = () => {
           </form>
         </Card>
 
-        <p className="mt-6 text-sm text-slate-500 text-center">
-          Powered by Wisperly — the receiver can turn off messages anytime.
-        </p>
+        <div className="mt-6 flex flex-col gap-4">
+          <div className="flex items-center justify-between gap-3">
+            <p className="text-sm text-slate-600">
+              Not sure what to ask? Get some ideas.
+            </p>
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              onClick={fetchSuggestedMessages}
+            >
+              Suggest questions
+            </Button>
+          </div>
+
+          {suggestedMessages.length > 0 && (
+            <Card className="border-dashed border-slate-300 bg-slate-50">
+              <CardHeader>
+                <CardTitle className="text-sm font-semibold text-slate-900">
+                  Suggested questions you can send
+                </CardTitle>
+                <CardDescription className="text-xs text-slate-500">
+                  Tap a question to use it as your message.
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-2">
+                <ul className="space-y-1 text-sm text-slate-800">
+                  {suggestedMessages.map((q, idx) => (
+                    <li key={idx}>
+                      <button
+                        type="button"
+                        className="w-full text-left rounded-md px-2 py-1.5 hover:bg-white hover:shadow-sm transition"
+                        onClick={() => {
+                          form.setValue("content", q, { shouldValidate: true });
+                        }}
+                      >
+                        {q}
+                      </button>
+                    </li>
+                  ))}
+                </ul>
+              </CardContent>
+            </Card>
+          )}
+
+          <p className="text-xs text-slate-500 text-center">
+            Powered by Wisperly — your identity stays anonymous.
+          </p>
+        </div>
       </section>
     </main>
   );
