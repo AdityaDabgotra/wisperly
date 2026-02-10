@@ -4,48 +4,62 @@ import dbConnect from "@/lib/db";
 import UserModel from "@/model/User";
 import mongoose from "mongoose";
 
-export async function GET(request: Request) {
-    await dbConnect();
-    const session = await getServerSession(authOptions);
+export async function GET() {
+  await dbConnect();
 
-    const userId = new mongoose.Types.ObjectId(session?.user._id);
+  const session = await getServerSession(authOptions);
 
-    if (!session || !session.user || !userId) {
-        return  Response.json({ 
-            success: false,
-            message: "Not Authenticated" 
-        }),
-        { status: 401 };
+  if (!session || !session.user || !session.user._id) {
+    return Response.json(
+      {
+        success: false,
+        message: "Not Authenticated",
+      },
+      { status: 401 }
+    );
+  }
+
+  const userId = new mongoose.Types.ObjectId(session.user._id);
+
+  try {
+    const user = await UserModel.aggregate([
+      { $match: { _id: userId } },
+      { $unwind: "$messages" },
+      { $sort: { "messages.createdAt": -1 } },
+      {
+        $group: {
+          _id: "$_id",
+          messages: { $push: "$messages" },
+        },
+      },
+    ]);
+
+    if (!user || user.length === 0) {
+      return Response.json(
+        {
+          success: false,
+          message: "User not found",
+        },
+        { status: 404 }
+      );
     }
 
-    try {
-        const user = await UserModel.aggregate([
-            {$match: {_id: userId}},
-            {$unwind: '$messages'},
-            {$sort: {'messages.createdAt': -1}},
-            {$group: {_id: '$_id',messages: {$push: '$messages'}}}
-        ])
+    return Response.json(
+      {
+        success: true,
+        message: user[0].messages,
+      },
+      { status: 200 }
+    );
+  } catch (error) {
+    console.error("Get messages error:", error);
 
-        if(!user || user.length === 0){
-            return  Response.json({
-                success: false,
-                message: "User not found",
-            }),
-            { status: 404 };
-        }
-        return Response.json({
-            success: true,
-            message: user[0].messages,
-        }),
-        { status: 200 };
-    } catch (error) {
-        return new Response(
-            JSON.stringify({
-                success: false,
-                message: "Internal Server Error",
-            }),
-            { status: 500 }
-        );
-        
-    }
+    return Response.json(
+      {
+        success: false,
+        message: "Internal Server Error",
+      },
+      { status: 500 }
+    );
+  }
 }
