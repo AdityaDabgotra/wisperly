@@ -1,16 +1,7 @@
 <p align="center">
-  <img src="https://img.shields.io/badge/Wisperly-✨-8A2BE2?style=for-the-badge&logo=nextdotjs&logoColor=white" />
-</p>
-
-<h1 align="center">🌟 Wisperly</h1>
-
-<p align="center">
-  A modern, vibrant platform for meaningful connections and expressive conversations — built with cutting‑edge web tech.
-</p>
-
-<p align="center">
-  <a href="https://github.com/AdityaDabgotra/wisperly">📦 Source</a> ·
-  <a href="#features">🚀 Features</a> ·
+  <a href="https://wisperly-adityadabgotras-projects.vercel.app/">🚀 Live Deployment</a> · 
+  <a href="https://github.com/AdityaDabgotra/wisperly">📦 Source</a> · 
+  <a href="#features">🚀 Features</a> · 
   <a href="#tech-stack">🛠 Tech Stack</a>
 </p>
 
@@ -71,7 +62,7 @@ Utility‑first styling for rapid UI development and consistency.
 │   ├── 📂 app       # App Router pages
 │   ├── 📂 components# Reusable UI components
 │   ├── 📂 lib       # Utilities & helpers
-│   └── 📂 model    # User model
+│   └── 📂 styles    # Global styles
 ├── 📄 next.config.js
 ├── 📄 tsconfig.json
 ├── 📄 package.json
@@ -142,3 +133,4 @@ Fork the repo, create a feature branch, and submit a pull request.
 This project is licensed under the **MIT License**.
 
 ---
+
