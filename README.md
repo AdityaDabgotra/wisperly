@@ -142,7 +142,3 @@ Fork the repo, create a feature branch, and submit a pull request.
 This project is licensed under the **MIT License**.
 
 ---
-
-<p align="center">
-  Built with ❤️ by <strong>Aditya Dabgotra</strong>
-</p>
