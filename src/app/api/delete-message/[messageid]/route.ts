@@ -6,9 +6,10 @@ import mongoose from "mongoose";
 
 export async function DELETE(
   request: Request,
-  { params }: { params: { messageid: string } }
+  { params }: { params: Promise<{ messageid: string }> }
 ) {
-  const messageId = params.messageid;
+  const { messageid } = await params;
+  
   await dbConnect();
   const session = await getServerSession(authOptions);
 
@@ -23,12 +24,18 @@ export async function DELETE(
   }
 
   try {
-    const userObjectId = new mongoose.Types.ObjectId(session.user._id as any);
-    const messageObjectId = new mongoose.Types.ObjectId(messageId);
+    const userObjectId = new mongoose.Types.ObjectId(session.user._id as string);
+    const messageObjectId = new mongoose.Types.ObjectId(messageid);
 
     const updatedResult = await UserModel.updateOne(
       { _id: userObjectId },
-      { $pull: { messages: { _id: messageObjectId } } }
+      {
+        $pull: {
+          messages: {
+            _id: messageObjectId,
+          },
+        },
+      }
     );
 
     if (updatedResult.modifiedCount === 0) {
