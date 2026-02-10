@@ -56,9 +56,15 @@ const page = () => {
       setIsSwitchLoading(true);
       try {
         const response = await axios.get<ApiResponse>("/api/get-messages");
-        setMessages(
-          Array.isArray(response.data.message) ? response.data.message : []
-        );
+        const raw = Array.isArray(response.data.message)
+          ? response.data.message
+          : [];
+        const sorted = [...raw].sort((a, b) => {
+          const aDate = new Date(a.createdAt as any).getTime();
+          const bDate = new Date(b.createdAt as any).getTime();
+          return bDate - aDate;
+        });
+        setMessages(sorted);
         if (refresh) {
           toast.success("Messages refreshed successfully");
         }
