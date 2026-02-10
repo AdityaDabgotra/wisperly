@@ -91,7 +91,8 @@ const page = () => {
     setIsSwitchLoading(true);
     try {
       const response = await axios.post<ApiResponse>("/api/accept-message", {
-        isAcceptingMessage: !acceptMessages,
+        // backend expects `acceptMessage` in the request body
+        acceptMessage: !acceptMessages,
       });
       setValue("acceptMessage", !acceptMessages);
       toast.success(

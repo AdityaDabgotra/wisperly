@@ -2,7 +2,6 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "../auth/[...nextauth]/options";
 import dbConnect from "@/lib/db";
 import UserModel from "@/model/User";
-import mongoose from "mongoose";
 
 export async function GET() {
   await dbConnect();
@@ -19,22 +18,10 @@ export async function GET() {
     );
   }
 
-  const userId = new mongoose.Types.ObjectId(session.user._id);
-
   try {
-    const user = await UserModel.aggregate([
-      { $match: { _id: userId } },
-      { $unwind: "$messages" },
-      { $sort: { "messages.createdAt": -1 } },
-      {
-        $group: {
-          _id: "$_id",
-          messages: { $push: "$messages" },
-        },
-      },
-    ]);
+    const user = await UserModel.findById(session.user._id).select("messages");
 
-    if (!user || user.length === 0) {
+    if (!user) {
       return Response.json(
         {
           success: false,
@@ -44,10 +31,11 @@ export async function GET() {
       );
     }
 
+    // Always succeed for an existing user; just return an empty array if no messages yet
     return Response.json(
       {
         success: true,
-        message: user[0].messages,
+        message: user.messages ?? [],
       },
       { status: 200 }
     );
